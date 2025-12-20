@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitster Audio Player</title>
+    <style>
+        body { background-color: #0a122e; color: white; font-family: 'Courier New', Courier, monospace; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100vh; margin: 0; }
+        h1 { color: #ff1493; font-size: 2.5rem; }
+        .player-container { border: 2px solid #19285a; padding: 40px; border-radius: 20px; background: #121e46; margin: 0 20px; }
+        audio { width: 100%; margin-top: 20px; filter: invert(100%); }
+        .btn { background-color: #ffda00; color: #0a122e; padding: 15px 30px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <div class="player-container">
+        <h1>PITSTER QUIZ</h1>
+        <p id="track-label">Laden...</p>
+        <audio id="audioPlayer" controls></audio>
+    </div>
+
+    <script>
+        // Pak het track nummer uit de URL: bijv. site.com/?track=01
+        const urlParams = new URLSearchParams(window.location.search);
+        const trackId = urlParams.get('track');
+        const player = document.getElementById('audioPlayer');
+        const label = document.getElementById('track-label');
+
+        if (trackId) {
+            label.innerText = "Track " + trackId;
+            player.src = "audio/" + trackId + ".mp3";
+        } else {
+            label.innerText = "Geen track gevonden in de URL.";
+        }
+    </script>
+</body>
+</html>
