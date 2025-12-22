@@ -3,36 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitster Audio Player</title>
+    <title>Pitster Quiz</title>
     <style>
-        body { background-color: #0a122e; color: white; font-family: 'Courier New', Courier, monospace; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100vh; margin: 0; }
-        h1 { color: #ff1493; font-size: 2.5rem; }
-        .player-container { border: 2px solid #19285a; padding: 40px; border-radius: 20px; background: #121e46; margin: 0 20px; }
-        audio { width: 100%; margin-top: 20px; filter: invert(100%); }
-        .btn { background-color: #ffda00; color: #0a122e; padding: 15px 30px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
+        body { background: #0a122e; color: white; font-family: sans-serif; text-align: center; padding: 50px; }
+        .timer { font-size: 3rem; color: #ff1493; margin: 20px; }
+        .controls { margin-top: 30px; }
+        button { padding: 15px 30px; font-size: 1rem; cursor: pointer; border-radius: 10px; border: none; }
+        #play-btn { background: #00ff00; }
+        #reveal-btn { background: #ffda00; margin-top: 20px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="player-container">
-        <h1>PITSTER QUIZ</h1>
-        <p id="track-label">Laden...</p>
-        <audio id="audioPlayer" controls></audio>
+    <h1>PITSTER QUIZ - TRACK #<span id="track-num">--</span></h1>
+    
+    <div class="timer" id="countdown">30</div>
+
+    <audio id="player"></audio>
+
+    <div class="controls">
+        <button id="play-btn">START FRAGMENT</button>
+        <br>
+        <button id="reveal-btn" class="hidden">ONTHUL ANTWOORD</button>
+        <h2 id="answer" class="hidden">Laden...</h2>
     </div>
 
     <script>
-        // Pak het track nummer uit de URL: bijv. site.com/?track=01
-        const urlParams = new URLSearchParams(window.location.search);
-        const trackId = urlParams.get('track');
-        const player = document.getElementById('audioPlayer');
-        const label = document.getElementById('track-label');
+        const params = new URLSearchParams(window.location.search);
+        const track = params.get('track');
+        const audio = document.getElementById('player');
+        const timerDisplay = document.getElementById('countdown');
+        const playBtn = document.getElementById('play-btn');
+        const revealBtn = document.getElementById('reveal-btn');
+        const answer = document.getElementById('answer');
 
-        if (trackId) {
-            label.innerText = "Track " + trackId;
-            player.src = trackId + ".mp3";
-        } else {
-            label.innerText = "Geen track gevonden in de URL.";
+        if (track) {
+            document.getElementById('track-num').innerText = track;
+            audio.src = `${track.padStart(3, '0')}.mp3`;
         }
+
+        let timeLeft = 30;
+        let timer;
+
+        playBtn.onclick = () => {
+            audio.play();
+            playBtn.disabled = true;
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    audio.pause();
+                    clearInterval(timer);
+                    revealBtn.classList.remove('hidden');
+                }
+            }, 1000);
+        };
+
+        revealBtn.onclick = () => {
+            answer.classList.remove('hidden');
+            answer.innerText = "Check je lijst voor nr: " + track;
+        };
     </script>
 </body>
 </html>
