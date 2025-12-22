@@ -1,82 +1,107 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitster Quiz</title>
-    <style>
-        body { background: #0a122e; color: white; font-family: sans-serif; text-align: center; padding: 50px; }
-        .timer { font-size: 3rem; color: #ff1493; margin: 20px; }
-        .controls { margin-top: 30px; }
-        button { padding: 15px 30px; font-size: 1rem; cursor: pointer; border-radius: 10px; border: none; }
-        #play-btn { background: #00ff00; }
-        #reveal-btn { background: #ffda00; margin-top: 20px; }
-        .hidden { display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pitster Quiz</title>
+
+<style>
+body {
+    background: #0a122e;
+    color: white;
+    font-family: sans-serif;
+    text-align: center;
+    padding: 50px;
+}
+.timer {
+    font-size: 3rem;
+    color: #ff1493;
+    margin: 20px;
+}
+.controls {
+    margin-top: 30px;
+}
+button {
+    padding: 15px 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 10px;
+    border: none;
+}
+#play-btn { background: #00ff00; }
+#reveal-btn { background: #ffda00; margin-top: 20px; }
+.hidden { display: none; }
+</style>
 </head>
+
 <body>
 
-    <h1>PITSTER - DE CRISIS VRIJE MUZIEK QUIZ</h1>
-    
-    <div class="timer" id="countdown">30</div>
+<h1>PITSTER - DE CRISIS VRIJE MUZIEK QUIZ</h1>
 
-    <audio id="player"></audio>
+<p>Nummer: <span id="track-num">?</span></p>
 
-    <div class="controls">
-        <button id="play-btn">START FRAGMENT</button>
-        <br>
-        <button id="reveal-btn" class="hidden">ONTHUL ANTWOORD</button>
-        <h2 id="answer" class="hidden">Laden...</h2>
-    </div>
+<div class="timer" id="countdown">30</div>
 
-    <script>
-    const params = new URLSearchParams(window.location.search);
-    const track = params.get('track');
-    const audio = document.getElementById('player');
-    const timerDisplay = document.getElementById('countdown');
-    const playBtn = document.getElementById('play-btn');
-    const revealBtn = document.getElementById('reveal-btn');
-    const answer = document.getElementById('answer');
+<audio id="player" preload="auto"></audio>
 
-    // Laden van het juiste bestand
-    if (track) {
-        document.getElementById('track-num').innerText = track;
-        // We gebruiken padStart om 5 om te zetten naar 005
-        audio.src = `${track.padStart(3, '0')}.mp3`;
-    }
+<div class="controls">
+    <button id="play-btn">START FRAGMENT</button><br>
+    <button id="reveal-btn" class="hidden">ONTHUL ANTWOORD</button>
+    <h2 id="answer" class="hidden"></h2>
+</div>
 
-    let timeLeft = 30;
-    let timer;
+<script>
+const params = new URLSearchParams(window.location.search);
+const track = params.get('track');
 
-    // Start fragment (speelt 30 seconden)
-    playBtn.onclick = () => {
-        audio.play();
-        playBtn.disabled = true;
-        playBtn.innerText = "FRAGMENT SPEELT...";
-        
-        timer = setInterval(() => {
-            timeLeft--;
-            timerDisplay.innerText = timeLeft;
-            
-            if (timeLeft <= 0) {
-                audio.pause();
-                clearInterval(timer);
-                revealBtn.classList.remove('hidden');
-                playBtn.innerText = "TIJD IS OM!";
-            }
-        }, 1000);
-    };
+const audio = document.getElementById('player');
+const timerDisplay = document.getElementById('countdown');
+const playBtn = document.getElementById('play-btn');
+const revealBtn = document.getElementById('reveal-btn');
+const answer = document.getElementById('answer');
+const trackNum = document.getElementById('track-num');
 
-    // Onthul antwoord en SPEEL VERDER
-    revealBtn.onclick = () => {
-        answer.classList.remove('hidden');
-        answer.innerText = "Geniet van het nummer! (Nr: " + track + ")";
-        
-        // Speel de rest van het liedje af
-        audio.play(); 
-        revealBtn.disabled = true;
-        revealBtn.innerText = "AAN HET FEESTEN...";
-    };
+let timeLeft = 30;
+let timer;
+
+// Track laden
+if (track) {
+    trackNum.innerText = track;
+    audio.src = `${track.padStart(3, '0')}.mp3`;
+} else {
+    alert("Geen tracknummer opgegeven!");
+}
+
+// Start fragment
+playBtn.onclick = () => {
+    audio.currentTime = 0;
+    audio.play();
+
+    playBtn.disabled = true;
+    playBtn.innerText = "FRAGMENT SPEELT...";
+
+    timer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.innerText = timeLeft;
+
+        if (timeLeft <= 0) {
+            audio.pause();
+            clearInterval(timer);
+            revealBtn.classList.remove('hidden');
+            playBtn.innerText = "TIJD IS OM!";
+        }
+    }, 1000);
+};
+
+// Onthul antwoord
+revealBtn.onclick = () => {
+    answer.classList.remove('hidden');
+    answer.innerText = `Geniet van het nummer! (Nr: ${track})`;
+    audio.play();
+    revealBtn.disabled = true;
+    revealBtn.innerText = "AAN HET FEESTEN...";
+};
 </script>
+
 </body>
 </html>
