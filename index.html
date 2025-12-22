@@ -30,40 +30,53 @@
     </div>
 
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const track = params.get('track');
-        const audio = document.getElementById('player');
-        const timerDisplay = document.getElementById('countdown');
-        const playBtn = document.getElementById('play-btn');
-        const revealBtn = document.getElementById('reveal-btn');
-        const answer = document.getElementById('answer');
+    const params = new URLSearchParams(window.location.search);
+    const track = params.get('track');
+    const audio = document.getElementById('player');
+    const timerDisplay = document.getElementById('countdown');
+    const playBtn = document.getElementById('play-btn');
+    const revealBtn = document.getElementById('reveal-btn');
+    const answer = document.getElementById('answer');
 
-        if (track) {
-            document.getElementById('track-num').innerText = track;
-            audio.src = `${track.padStart(3, '0')}.mp3`;
-        }
+    // Laden van het juiste bestand
+    if (track) {
+        document.getElementById('track-num').innerText = track;
+        // We gebruiken padStart om 5 om te zetten naar 005
+        audio.src = `${track.padStart(3, '0')}.mp3`;
+    }
 
-        let timeLeft = 30;
-        let timer;
+    let timeLeft = 30;
+    let timer;
 
-        playBtn.onclick = () => {
-            audio.play();
-            playBtn.disabled = true;
-            timer = setInterval(() => {
-                timeLeft--;
-                timerDisplay.innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    audio.pause();
-                    clearInterval(timer);
-                    revealBtn.classList.remove('hidden');
-                }
-            }, 1000);
-        };
+    // Start fragment (speelt 30 seconden)
+    playBtn.onclick = () => {
+        audio.play();
+        playBtn.disabled = true;
+        playBtn.innerText = "FRAGMENT SPEELT...";
+        
+        timer = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft;
+            
+            if (timeLeft <= 0) {
+                audio.pause();
+                clearInterval(timer);
+                revealBtn.classList.remove('hidden');
+                playBtn.innerText = "TIJD IS OM!";
+            }
+        }, 1000);
+    };
 
-        revealBtn.onclick = () => {
-            answer.classList.remove('hidden');
-            answer.innerText = "Check je lijst voor nr: " + track;
-        };
-    </script>
+    // Onthul antwoord en SPEEL VERDER
+    revealBtn.onclick = () => {
+        answer.classList.remove('hidden');
+        answer.innerText = "Geniet van het nummer! (Nr: " + track + ")";
+        
+        // Speel de rest van het liedje af
+        audio.play(); 
+        revealBtn.disabled = true;
+        revealBtn.innerText = "AAN HET FEESTEN...";
+    };
+</script>
 </body>
 </html>
