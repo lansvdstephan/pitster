@@ -28,7 +28,7 @@
         h1 { color: var(--pink); margin-bottom: 5px; letter-spacing: 2px; }
         .track-info { font-size: 1.2rem; margin-bottom: 20px; color: var(--yellow); }
 
-        /* De Draaiende Plaat */
+        /* De LP Container */
         .record-container {
             position: relative;
             width: 320px;
@@ -39,99 +39,129 @@
             cursor: pointer;
         }
 
+        /* De zwarte basisplaat */
         .record {
             position: absolute;
             width: 100%;
             height: 100%;
+            background: radial-gradient(circle, #222 0%, #000 100%);
             border-radius: 50%;
-            /* Conic gradient voor de 270 graden ringen zodat je de rotatie ziet */
-            background: 
-                conic-gradient(from 0deg, var(--pink) 0deg 270deg, transparent 270deg 360deg),
-                conic-gradient(from 45deg, var(--orange) 0deg 270deg, transparent 270deg 360deg),
-                conic-gradient(from 90deg, var(--yellow) 0deg 270deg, transparent 270deg 360deg),
-                radial-gradient(circle, #222 0%, #000 100%);
-            background-blend-mode: screen;
             box-shadow: 0 0 40px rgba(0,0,0,1);
             z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* De groeven over de kleuren heen */
-        .record::after {
-            content: "";
+        /* De gekleurde ringen (270 graden) */
+        .ring {
             position: absolute;
-            inset: 0;
             border-radius: 50%;
-            background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.4) 31%, transparent 32%, rgba(0,0,0,0.4) 40%, transparent 41%, rgba(0,0,0,0.4) 50%, transparent 51%);
+            border: 12px solid transparent;
+            z-index: 2;
+        }
+
+        .ring-pink {
+            width: 260px; height: 260px;
+            border-top-color: var(--pink);
+            border-right-color: var(--pink);
+            border-bottom-color: var(--pink);
+            transform: rotate(45deg);
+        }
+
+        .ring-orange {
+            width: 210px; height: 210px;
+            border-top-color: var(--orange);
+            border-right-color: var(--orange);
+            border-bottom-color: var(--orange);
+            transform: rotate(-15deg);
+        }
+
+        .ring-yellow {
+            width: 160px; height: 160px;
+            border-top-color: var(--yellow);
+            border-right-color: var(--yellow);
+            border-bottom-color: var(--yellow);
+            transform: rotate(120deg);
         }
 
         /* De Timer in het midden */
         .timer-label {
             position: relative;
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
             background: #111;
             border-radius: 50%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 2;
+            z-index: 3;
             border: 4px solid white;
         }
 
-        .timer-val { font-size: 2.8rem; color: white; line-height: 1; }
+        .timer-val { font-size: 2.5rem; color: white; line-height: 1; }
 
-        /* Animatie voor het draaien */
+        /* Draai-animatie */
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        .playing .record {
-            animation: spin 2s linear infinite;
+        .playing .record-inner-wrap {
+            animation: spin 3s linear infinite;
+        }
+
+        .record-inner-wrap {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Controls */
         .controls { margin-top: 30px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .row { display: flex; gap: 10px; }
         
         button { 
-            padding: 12px 25px; 
-            font-size: 0.9rem; 
+            padding: 12px 30px; 
+            font-size: 1rem; 
             border: none; 
             border-radius: 50px; 
             cursor: pointer; 
             font-weight: bold;
             text-transform: uppercase;
+            transition: 0.2s;
         }
 
         .btn-pause { background: var(--yellow); color: var(--dark); }
         .btn-reveal { background: var(--pink); color: white; }
-        .btn-next { background: white; color: var(--dark); margin-top: 10px; }
         .hidden { display: none; }
         
-        #answer-text { margin-top: 15px; color: var(--yellow); font-size: 1.2rem; text-align: center; }
+        #answer-text { margin-top: 15px; color: var(--yellow); font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
-    <h1>PITSTER</h1>
-    <h2>DE MUZIEKQUIZ ZONDER CRISISMUZIEK</h2>
+    <h1>PITSTER QUIZ</h1>
     <div class="track-info">TRACK #<span id="track-num">--</span></div>
 
     <div class="record-container" id="record-player">
-        <div class="record"></div>
+        <div class="record-inner-wrap">
+            <div class="record"></div>
+            <div class="ring ring-pink"></div>
+            <div class="ring ring-orange"></div>
+            <div class="ring ring-yellow"></div>
+        </div>
+        
         <div class="timer-label">
             <div class="timer-val" id="countdown">30</div>
         </div>
     </div>
 
     <div class="controls">
-        <div class="row">
-            <button id="pause-btn" class="btn-pause">START</button>
-            <button id="reveal-btn" class="btn-reveal hidden">VERDER LUISTEREN</button>
-        </div>
-        <button id="next-btn" class="btn-next hidden">VOLGENDE SCAN</button>
+        <button id="pause-btn" class="btn-pause">START</button>
+        <button id="reveal-btn" class="btn-reveal hidden">VERDER LUISTEREN</button>
         <div id="answer-text" class="hidden"></div>
     </div>
 
@@ -145,7 +175,6 @@
         const timerDisplay = document.getElementById('countdown');
         const pauseBtn = document.getElementById('pause-btn');
         const revealBtn = document.getElementById('reveal-btn');
-        const nextBtn = document.getElementById('next-btn');
         const answerText = document.getElementById('answer-text');
 
         let timeLeft = 30;
@@ -197,16 +226,7 @@
             answerText.classList.remove('hidden');
             audio.play();
             container.classList.add('playing');
-            nextBtn.classList.remove('hidden');
             revealBtn.innerText = "AAN HET AFSPELEN...";
-        };
-
-        nextBtn.onclick = () => {
-            // Probeer venster te sluiten, anders terug naar start
-            window.close();
-            setTimeout(() => {
-                window.location.href = "https://lansvdstephan.github.io/pitster/";
-            }, 200);
         };
     </script>
 </body>
