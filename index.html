@@ -25,8 +25,9 @@
             overflow: hidden;
         }
 
-        h1 { color: var(--pink); margin-bottom: 5px; letter-spacing: 2px; text-transform: uppercase; }
-        .track-info { font-size: 1.2rem; margin-bottom: 30px; color: var(--yellow); }
+        h1 { color: var(--pink); margin-bottom: 0; letter-spacing: 2px; text-transform: uppercase; }
+        h3 { color: white; margin-top: 5px; margin-bottom: 20px; font-size: 1rem; opacity: 0.8; }
+        .track-info { font-size: 1.2rem; margin-bottom: 20px; color: var(--yellow); }
 
         /* De LP Container */
         .record-container {
@@ -39,7 +40,7 @@
             cursor: pointer;
         }
 
-        /* De Groep die draait (alleen de plaat en ringen) */
+        /* De Groep die draait */
         .vinyl-wrapper {
             position: absolute;
             width: 100%;
@@ -48,10 +49,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.5s ease;
         }
 
-        /* De zwarte basisplaat */
         .record-base {
             position: absolute;
             width: 100%;
@@ -61,7 +60,6 @@
             box-shadow: 0 0 40px rgba(0,0,0,0.8);
         }
 
-        /* De gekleurde ringen (precies 270 graden) */
         .ring {
             position: absolute;
             border-radius: 50%;
@@ -92,7 +90,7 @@
             transform: rotate(120deg);
         }
 
-        /* De Timer (staat STIL in het midden) */
+        /* De Timer (Staat stil) */
         .center-label {
             position: absolute;
             width: 100px;
@@ -104,17 +102,14 @@
             justify-content: center;
             z-index: 10;
             border: 5px solid white;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
 
         .timer-val { 
             font-size: 3rem; 
             color: var(--pink); 
-            font-family: 'Arial Black', sans-serif;
             line-height: 1;
         }
 
-        /* Animatie voor het draaien */
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -135,20 +130,20 @@
             cursor: pointer; 
             font-weight: bold;
             text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .btn-pause { background: var(--yellow); color: var(--dark); }
         .btn-reveal { background: var(--pink); color: white; }
         .hidden { display: none; }
         
-        #answer-text { margin-top: 20px; color: var(--yellow); font-size: 1.3rem; text-align: center; }
+        #answer-text { margin-top: 20px; color: var(--yellow); font-size: 1.3rem; }
     </style>
 </head>
 <body>
 
     <h1>PITSTER</h1>
     <h3>DE CRISISVRIJE MUZIEKQUIZ</h3>
+    <div class="track-info">TRACK #<span id="track-num">--</span></div>
 
     <div class="record-container" id="record-player">
         <div class="vinyl-wrapper">
@@ -180,19 +175,21 @@
         const pauseBtn = document.getElementById('pause-btn');
         const revealBtn = document.getElementById('reveal-btn');
         const answerText = document.getElementById('answer-text');
+        const trackNumDisplay = document.getElementById('track-num');
 
         let timeLeft = 30;
         let timer = null;
         let isPlaying = false;
 
+        // Correctie van het pad: we voegen 'audio/' weer toe
         if (trackId) {
-            document.getElementById('track-num').innerText = trackId;
+            trackNumDisplay.innerText = trackId;
             audio.src = `${trackId.padStart(3, '0')}.mp3`;
         }
 
         function togglePlay() {
             if (!isPlaying) {
-                audio.play();
+                audio.play().catch(e => console.error("Audio kon niet afspelen:", e));
                 isPlaying = true;
                 container.classList.add('playing');
                 pauseBtn.innerText = "PAUZE";
