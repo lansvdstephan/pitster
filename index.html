@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pitster Quiz - Vinyl Timer</title>
+    <title>Pitster Quiz - Retro Vinyl</title>
     <style>
         :root {
             --pink: #ff1493;
             --yellow: #ffda00;
+            --blue: #00bfff;
             --dark: #0a122e;
-            --vinyl-black: #111;
         }
 
         body { 
@@ -27,7 +27,7 @@
         h1 { color: var(--pink); margin-bottom: 5px; letter-spacing: 2px; }
         .track-info { font-size: 1.2rem; margin-bottom: 30px; color: var(--yellow); }
 
-        /* De Draaiende Plaat */
+        /* De Draaiende Plaat met gekleurde ringen */
         .record-container {
             position: relative;
             width: 350px;
@@ -42,30 +42,40 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, #333 2%, #111 5%, #111 15%, #000 16%, #111 20%, #000 25%, #111 30%, #000 35%, #111 40%, #000 45%, #111 50%, #000 55%, #111 60%);
+            /* Retro kleuren effect in de groeven */
+            background: radial-gradient(circle, 
+                transparent 30%, 
+                var(--pink) 31%, var(--pink) 32%, 
+                #111 33%, 
+                var(--blue) 40%, var(--blue) 41%,
+                #111 42%,
+                var(--yellow) 50%, var(--yellow) 51%,
+                #111 52%,
+                #000 70%
+            ), 
+            radial-gradient(circle, #222 0%, #000 100%);
             border-radius: 50%;
             box-shadow: 0 0 50px rgba(0,0,0,0.8);
             z-index: 1;
         }
 
-        /* De Timer in het midden van de plaat */
+        /* De Timer in het midden */
         .timer-label {
             position: relative;
-            width: 110px;
-            height: 110px;
-            background: var(--pink);
+            width: 120px;
+            height: 120px;
+            background: #111;
             border-radius: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 2; /* Bovenop de plaat */
-            border: 6px solid rgba(255,255,255,0.3);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            z-index: 2;
+            border: 4px solid var(--pink);
         }
 
-        .timer-val { font-size: 2.5rem; line-height: 1; }
-        .timer-text { font-size: 0.7rem; text-transform: uppercase; }
+        .timer-val { font-size: 3rem; color: var(--pink); line-height: 1; }
+        .timer-text { font-size: 0.6rem; color: white; text-transform: uppercase; margin-top: 5px;}
 
         /* Animatie voor het draaien */
         @keyframes spin {
@@ -74,27 +84,28 @@
         }
 
         .playing .record {
-            animation: spin 2.5s linear infinite;
+            animation: spin 3s linear infinite;
         }
 
-        /* Knoppen en Controls */
+        /* Controls */
         .controls { margin-top: 40px; display: flex; gap: 15px; }
         
         button { 
-            padding: 12px 25px; 
-            font-size: 0.9rem; 
+            padding: 15px 30px; 
+            font-size: 1rem; 
             border: none; 
-            border-radius: 5px; 
+            border-radius: 50px; 
             cursor: pointer; 
             font-weight: bold;
             text-transform: uppercase;
+            transition: 0.2s;
         }
 
         .btn-pause { background: var(--yellow); color: var(--dark); }
-        .btn-reveal { background: white; color: var(--dark); }
+        .btn-reveal { background: var(--pink); color: white; }
         .hidden { display: none; }
-
-        #answer-text { margin-top: 20px; color: var(--yellow); font-size: 1.5rem; }
+        
+        #answer-text { margin-top: 25px; color: var(--yellow); font-size: 1.5rem; }
     </style>
 </head>
 <body>
@@ -105,14 +116,14 @@
     <div class="record-container" id="record-player">
         <div class="record"></div>
         <div class="timer-label">
-            <div class="timer-text">Seconds</div>
             <div class="timer-val" id="countdown">30</div>
+            <div class="timer-text">sec over</div>
         </div>
     </div>
 
     <div class="controls">
-        <button id="pause-btn" class="btn-pause">PAUZE</button>
-        <button id="reveal-btn" class="btn-reveal hidden">ONTHUL ANTWOORD</button>
+        <button id="pause-btn" class="btn-pause">START</button>
+        <button id="reveal-btn" class="btn-reveal hidden">VERDER LUISTEREN</button>
     </div>
 
     <div id="answer-text" class="hidden"></div>
@@ -130,7 +141,7 @@
         const answerText = document.getElementById('answer-text');
 
         let timeLeft = 30;
-        let timer;
+        let timer = null;
         let isPlaying = false;
 
         if (trackId) {
@@ -138,24 +149,30 @@
             audio.src = `${trackId.padStart(3, '0')}.mp3`;
         }
 
-        // Starten bij klik op de plaat
-        container.onclick = () => {
-            if (!isPlaying && timeLeft > 0) {
-                startMusic();
+        function togglePlay() {
+            if (!isPlaying) {
+                audio.play();
+                isPlaying = true;
+                container.classList.add('playing');
+                pauseBtn.innerText = "PAUZE";
+                
+                // Start of hervat de timer
+                timer = setInterval(() => {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        timerDisplay.innerText = timeLeft;
+                    } else {
+                        stopMusic();
+                    }
+                }, 1000);
+            } else {
+                // Pauzeer muziek, plaat én timer
+                audio.pause();
+                isPlaying = false;
+                container.classList.remove('playing');
+                pauseBtn.innerText = "VERDER";
+                clearInterval(timer);
             }
-        };
-
-        function startMusic() {
-            audio.play();
-            isPlaying = true;
-            container.classList.add('playing');
-            timer = setInterval(() => {
-                timeLeft--;
-                timerDisplay.innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    stopMusic();
-                }
-            }, 1000);
         }
 
         function stopMusic() {
@@ -163,28 +180,20 @@
             isPlaying = false;
             container.classList.remove('playing');
             clearInterval(timer);
+            pauseBtn.classList.add('hidden');
             revealBtn.classList.remove('hidden');
         }
 
-        pauseBtn.onclick = () => {
-            if (isPlaying) {
-                audio.pause();
-                container.classList.remove('playing');
-                isPlaying = false;
-                pauseBtn.innerText = "VERDER";
-            } else {
-                audio.play();
-                container.classList.add('playing');
-                isPlaying = true;
-                pauseBtn.innerText = "PAUZE";
-            }
-        };
+        // Klikken op de plaat OF de knop start/pauzeert
+        container.onclick = togglePlay;
+        pauseBtn.onclick = togglePlay;
 
         revealBtn.onclick = () => {
             answerText.innerText = "NR: " + trackId + " - Check je lijst!";
             answerText.classList.remove('hidden');
-            audio.play();
+            audio.play(); // Speel de rest van het nummer
             container.classList.add('playing');
+            revealBtn.innerText = "AAN HET FEESTEN...";
         };
     </script>
 </body>
